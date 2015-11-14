@@ -1,7 +1,6 @@
 //
 //  ViewController.m
 //  AccelerometerAndMition
-//
 //  Created by Tsz on 15/11/13.
 //  Copyright © 2015年 Tsz. All rights reserved.
 
@@ -128,7 +127,6 @@
 }
 
 
-
 #pragma mark:运动管理器实现 磁力计
 - (void)magneticDemo{
     //1、创建运动管理器
@@ -149,6 +147,20 @@
         NSLog(@"%f, %f, %f", magneticFileld.x, magneticFileld.y, magneticFileld.z);
         
     }];
+}
+
+
+#pragma mark: 实现摇一摇
+- (void)motionBegan:(UIEventSubtype)motion withEvent:(UIEvent *)event{
+    NSLog(@"开始摇一摇");
+}
+
+-(void)motionEnded:(UIEventSubtype)motion withEvent:(UIEvent *)event{
+    NSLog(@"%s",__func__);
+}
+
+- (void)motionCancelled:(UIEventSubtype)motion withEvent:(UIEvent *)event{
+     NSLog(@"%s",__func__);
 }
 
 
