@@ -35,7 +35,9 @@
 //触频
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
     
-    [self pushGrou];
+//    [self pushGrou];
+    
+    [self pullAccelerometer];
 }
 
 
@@ -82,9 +84,48 @@
         CMRotationRate rotationRate = gyroData.rotationRate;
         NSLog(@"%f",rotationRate.x);
     }];
-    
 }
 
+
+#pragma mark: 从iOS4开始：CoreMotion.framework
+- (void)pushAcceleromater{
+    
+    //1. 创建运动管理器
+    self.motionManager = [CMMotionManager new];
+    
+    //2. 判断是否可用
+    if (![self.motionManager isAccelerometerAvailable]) {
+        NSLog(@"加速计不可用");
+        return;
+    }
+    
+    //3. 设置采样间隔
+    self.motionManager.accelerometerUpdateInterval = 1;
+    
+    //4. 开始采样
+    [self.motionManager startAccelerometerUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMAccelerometerData *accelerometerData, NSError *error) {
+        if (error) return;
+        
+        CMAcceleration acceleraion = accelerometerData.acceleration;
+//        NSLog(@"%f, %f, %f", acceleraion.x, acceleraion.y, acceleraion.z);
+        NSLog(@"%@",accelerometerData);
+    }];
+
+}
+
+- (void)pullAccelerometer{
+    //1. 创建运动管理器
+    self.motionManager = [CMMotionManager new];
+    
+    //2. 判断是否可用
+    if (![self.motionManager isAccelerometerAvailable]) {
+        NSLog(@"加速计不可用");
+        return;
+    }
+    
+    //3. . 开始采样
+    [self.motionManager startAccelerometerUpdates];
+}
 
 
 
@@ -114,7 +155,7 @@
 #pragma mark  UIAccelerometer 加速计的使用 ，使用真机 ，实现小球的运动
 
 /*在iOS4以前：使用UIAccelerometer，用法非常简单（到了iOS5就已经过期）
-从iOS4开始：CoreMotion.framework
+
 */
 - (void)accelerometerDemo{
     
