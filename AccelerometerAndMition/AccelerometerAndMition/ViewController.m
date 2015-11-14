@@ -10,6 +10,8 @@
 @interface ViewController () <UIAccelerometerDelegate>
 @property (weak, nonatomic) IBOutlet UIImageView *ball;
 
+@property (weak, nonatomic) IBOutlet UILabel *textLabel;
+
 // 计算 速度
 @property (nonatomic)CGPoint velocity;
 
@@ -36,7 +38,9 @@
     
 //    [self pushGrou];
     
-    [self pullAccelerometer];
+//    [self pullAccelerometer];
+    
+    [self stepCounter];
 }
 
 
@@ -149,7 +153,6 @@
     }];
 }
 
-
 #pragma mark: 实现摇一摇
 - (void)motionBegan:(UIEventSubtype)motion withEvent:(UIEvent *)event{
     NSLog(@"开始摇一摇");
@@ -162,6 +165,35 @@
 - (void)motionCancelled:(UIEventSubtype)motion withEvent:(UIEvent *)event{
      NSLog(@"%s",__func__);
 }
+
+
+#pragma mark: 计步器的实现
+- (void)stepCounter{
+    
+    //1、判断 可用
+    if (![CMStepCounter isStepCountingAvailable]) {
+        NSLog(@"计步器不可用");
+        return;
+    }
+    
+    //2、创建
+    CMStepCounter *stepCounter = [CMStepCounter new];
+    
+    //3、开始计步
+    NSOperationQueue *queue = [[NSOperationQueue alloc] init];
+    
+    [stepCounter startStepCountingUpdatesToQueue:queue updateOn:5 withHandler:^(NSInteger numberOfSteps, NSDate * _Nonnull timestamp, NSError * _Nullable error) {
+       
+        //如果错误 ，返回
+        if(error) return;
+        
+        NSString *str = [NSString stringWithFormat:@"总共走了%zd步" , numberOfSteps];
+        
+        [self.textLabel performSelectorOnMainThread:@selector(setText:) withObject:str waitUntilDone:NO];
+    }];
+}
+
+
 
 
 #pragma mark  UIAccelerometer 加速计的使用 ，使用真机 ，实现小球的运动
