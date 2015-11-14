@@ -6,6 +6,7 @@
 //  Copyright © 2015年 Tsz. All rights reserved.
 
 #import "ViewController.h"
+#import <CoreMotion/CoreMotion.h>
 
 @interface ViewController () <UIAccelerometerDelegate>
 @property (weak, nonatomic) IBOutlet UIImageView *ball;
@@ -13,6 +14,8 @@
 // 计算 速度
 @property (nonatomic)CGPoint velocity;
 
+//运动管理器
+@property (nonatomic , strong) CMMotionManager *motionManager;
 @end
 
 @implementation ViewController
@@ -20,10 +23,96 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    [self accelerometerDemo];
+    //1、加速计实现小球运动
+//    [self accelerometerDemo];
+
+    //2、磁力计的实现 和测试
+//    [self magneticDemo];
+    
+   
 }
 
-#pragma mark  UIAccelerometer 加速计的使用 ，使用真机
+//触频
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
+    
+    [self pushGrou];
+}
+
+
+
+#pragma mark 陀螺仪
+
+
+// 在有需要的时候，再主动去采集数据
+- (void)pullGrou{
+    //1、创建运动管理器
+    self.motionManager = [CMMotionManager alloc];
+    
+    if (![self.motionManager isGyroAvailable]) {
+        NSLog(@"陀螺仪不可用");
+        return;
+    }
+    
+    //开始采样
+    [self.motionManager startGyroUpdates];
+//    [self.motionManager startGyroUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMGyroData * _Nullable gyroData, NSError * _Nullable error) {
+//        
+//        CMRotationRate rotationRate = gyroData.rotationRate;
+//        NSLog(@"%f",rotationRate.x);
+//    }];
+}
+
+//实时采集所有数据（采集频率高）
+- (void)pushGrou{
+    
+    //1. 创建运动管理器
+    self.motionManager = [CMMotionManager new];
+    
+    //2. 判断是否可用
+    if (![self.motionManager isGyroAvailable]) {
+        NSLog(@"陀螺仪不可用");
+        return;
+    }
+    
+    //3、设置采样间隔
+    self.motionManager.gyroUpdateInterval = 1;
+    
+    //4、 开始采样
+    [self.motionManager startGyroUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMGyroData * _Nullable gyroData, NSError * _Nullable error) {
+        CMRotationRate rotationRate = gyroData.rotationRate;
+        NSLog(@"%f",rotationRate.x);
+    }];
+    
+}
+
+
+
+
+#pragma mark:运动管理器实现 磁力计
+- (void)magneticDemo{
+    //1、创建运动管理器
+    self.motionManager = [[CMMotionManager alloc] init];
+    
+    //2、判断是否可用
+    if (![self.motionManager isMagnetometerAvailable]) {
+        NSLog(@"磁力计 不可用");
+        return;
+    }
+    
+    //3、设置 采样 间隔
+    self.motionManager.magnetometerUpdateInterval = 1;
+    
+    //4、开始采样
+    [self.motionManager  startMagnetometerUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMMagnetometerData * _Nullable magnetometerData, NSError * _Nullable error) {
+        CMMagneticField  magneticFileld = magnetometerData.magneticField;
+        NSLog(@"%f, %f, %f", magneticFileld.x, magneticFileld.y, magneticFileld.z);
+        
+    }];
+}
+
+
+#pragma mark  UIAccelerometer 加速计的使用 ，使用真机 ，实现小球的运动
+
 /*在iOS4以前：使用UIAccelerometer，用法非常简单（到了iOS5就已经过期）
 从iOS4开始：CoreMotion.framework
 */
@@ -40,7 +129,7 @@
     
 }
 
-//代理
+#pragma mark: 加速计的代理方法
 - (void)accelerometer:(UIAccelerometer *)accelerometer didAccelerate:(UIAcceleration *)acceleration{
     
 //    NSLog(@"x: %f, y: %f, z: %f", acceleration.x, acceleration.y, acceleration.z);
